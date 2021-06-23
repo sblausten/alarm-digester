@@ -2,13 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="30384ff1-fbe9-46ab-9b5d-6fcad869f960" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dao/models.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/dao/mongodb-client.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nats-consumer.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/application-config.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dao/AlarmDao.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dao/DigestDao.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nats/Publisher.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nats/handlers.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/nats/models.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/models.go" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/dao/mongodb-client.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/mongodb-client.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nats-consumer.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/subscriber.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,6 +65,9 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/nats" />
       <recent name="$PROJECT_DIR$/dao" />
     </key>
   </component>
@@ -93,7 +102,7 @@
       <workItem from="1623998803971" duration="387000" />
       <workItem from="1624000268440" duration="557000" />
       <workItem from="1624001057723" duration="1334000" />
-      <workItem from="1624095657182" duration="3507000" />
+      <workItem from="1624095657182" duration="45504000" />
     </task>
     <servers />
   </component>
@@ -112,9 +121,17 @@
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
     <state x="670" y="-881" key="#Go_Modules_(vgo)/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624181407758" />
+    <state x="817" y="-738" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1624192124478">
+      <screen x="-126" y="-1057" width="1920" height="1057" />
+    </state>
+    <state x="817" y="-738" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624192124478" />
     <state x="652" y="-868" key="SettingsEditor" timestamp="1624000508903">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
     <state x="652" y="-868" key="SettingsEditor/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624000508903" />
+    <state x="728" y="-924" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1624301213358">
+      <screen x="-126" y="-1057" width="1920" height="1057" />
+    </state>
+    <state x="728" y="-924" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624301213358" />
   </component>
 </project>

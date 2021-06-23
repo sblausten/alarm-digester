@@ -2,39 +2,46 @@ package dao
 
 import (
 	"context"
-	"fmt"
-	"log"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
+	"github.com/sblausten/go-service/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"log"
+	"strings"
 )
 
-func buildClient(env string) *mongo.Client {
-	/*
-	   Connect to my cluster
-	*/
-
-	dbUrl := getConnectionUrl(env)
+func BuildClient(config config.Config, ctx context.Context) *mongo.Client {
+	dbUrl := getConnectionUrl(config)
 
 	client, err := mongo.NewClient(options.Client().ApplyURI(dbUrl))
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not build MongoDb client: %e", err)
 	}
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
 	err = client.Connect(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Could not connect to MongoDb database: %e", err)
 	}
-	defer client.Disconnect(ctx)
+
+	err = client.Ping(ctx, readpref.Primary())
+	if err != nil {
+		log.Fatalf("Could not ping MongoDb database: %e", err)
+	}
+
+	return client
 }
 
+func GetCollection(client *mongo.Client, databaseName string, collectionName string) *mongo.Collection {
+	collection := client.Database(databaseName).Collection(collectionName)
+	return collection
+}
 
-func getConnectionUrl(env string) string {
-	if env == "dev" {
-		return "localhost:27017"
+func getConnectionUrl(config config.Config) string {
+	if config.Env == "dev" {
+		return config.Db.LocalAddress
 	} else {
-		return "mongodb+srv://netdata-test:<password>@cluster0.1un1e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+		if config.Db.Password == "" {
+			log.Fatalf("No password found. Cannot connect to remote db in env: %e", config.Env)
+		}
+		return strings.Replace(config.Db.RemoteAddress, "<password>", config.Db.Password, 0)
 	}
 }
