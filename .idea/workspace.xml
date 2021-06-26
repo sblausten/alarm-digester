@@ -2,20 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="30384ff1-fbe9-46ab-9b5d-6fcad869f960" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/nats/handlers_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/nats/subscriber_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/AlarmDao.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/AlarmDao.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/DigestDao.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/DigestDao.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dao/mongodb-client.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/mongodb-client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nats/Publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/Publisher.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nats/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nats/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/nats/subscriber.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/subscriber.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/AlarmDao.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/AlarmDao.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/dao/DigestDao.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/DigestDao.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nats/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nats/subscriber_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/subscriber_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +103,7 @@
       <workItem from="1624095657182" duration="51027000" />
       <workItem from="1624615031357" duration="598000" />
       <workItem from="1624627480908" duration="4764000" />
-      <workItem from="1624699026823" duration="1517000" />
+      <workItem from="1624699026823" duration="2442000" />
     </task>
     <servers />
   </component>

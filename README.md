@@ -1,4 +1,4 @@
-### Netdata Test Service
+### Nats Test Service
 
 #### Start application with db:
 

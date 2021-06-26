@@ -22,11 +22,11 @@ type AlarmDao struct {
 }
 
 type AlarmStatusChanged struct {
-	_ID primitive.ObjectID
-	AlarmID string
-	UserID string
-	Status string
-	ChangedAt primitive.DateTime
+	_ID        primitive.ObjectID
+	Alarm_ID   string
+	User_ID    string
+	Status     string
+	Changed_At primitive.DateTime
 }
 
 func (a AlarmDao) BuildAlarmIndexes() {
@@ -34,11 +34,15 @@ func (a AlarmDao) BuildAlarmIndexes() {
 
 	indexModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"changedat": 1},
+			Keys: bson.M{"changed_at": 1},
 			Options: nil,
 		},
 		{
-			Keys: bson.M{"userid": 1},
+			Keys: bson.M{"user_id": 1},
+			Options: nil,
+		},
+		{
+			Keys: bson.M{"status": 1},
 			Options: nil,
 		},
 	}
@@ -69,12 +73,18 @@ func (a AlarmDao) GetActiveAlarms(userId string, from primitive.DateTime) ([]Ala
 
 	findOptions := options.Find()
 	findOptions.SetLimit(50)
-	findOptions.SetSort(bson.D{{ "changedat", 1}})
+	findOptions.SetSort(bson.D{{ "changed_at", 1}})
 
 	var results []AlarmStatusChanged
 
-	filter := bson.D{{ "userid", userId }}
-	cur, err := a.Collection.Find(ctx, filter, findOptions)
+	activeAlarmsForUser := bson.D{
+		{ "user_id", userId },
+		{"$or", []bson.M{
+			bson.M{"status": "CRITICAL"},
+			bson.M{"status": "ALARM"},
+		}},
+	}
+	cur, err := a.Collection.Find(ctx, activeAlarmsForUser, findOptions)
 	if err != nil {
 		log.Printf("GetActiveAlarms - lookup failed with Find error: %e", err)
 		return nil, err
@@ -87,7 +97,7 @@ func (a AlarmDao) GetActiveAlarms(userId string, from primitive.DateTime) ([]Ala
 			log.Printf("GetActiveAlarms - lookup failed with Decode error: %e", err)
 			return nil, err
 		}
-		if alarmChange.ChangedAt >= from {
+		if alarmChange.Changed_At >= from {
 			results = append(results, alarmChange)
 		}
 	}

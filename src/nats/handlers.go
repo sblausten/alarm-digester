@@ -13,13 +13,13 @@ func AlarmStatusChangeHandler(alarmDao dao.AlarmDaoInterface) func(message dao.A
 
 	return func(message dao.AlarmStatusChanged) {
 		messageCounter++
-		log.Printf("[#%d] Received AlarmStatusChanged for [%s] with alarmId: '%s'", messageCounter, message.ChangedAt, message.AlarmID)
+		log.Printf("[#%d] Received AlarmStatusChanged for [%s] with alarmId: '%s'", messageCounter, message.Changed_At, message.Alarm_ID)
 
 		_, err := alarmDao.InsertAlarm(message)
 		if err != nil {
-			log.Printf("Failed to save AlarmStatusChanged message with alarmId: %a for user: %u", message.AlarmID, message.UserID)
+			log.Printf("Failed to save AlarmStatusChanged message with alarmId: %a for user: %u", message.Alarm_ID, message.User_ID)
 		} else {
-			log.Printf("Saved AlarmStatusChanged message with alarmId: %a for user: %u", message.AlarmID, message.UserID)
+			log.Printf("Saved AlarmStatusChanged message with alarmId: %a for user: %u", message.Alarm_ID, message.User_ID)
 		}
 	}
 }
@@ -29,10 +29,10 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 
 	return func(message dao.SendAlarmDigest) {
 		messageCounter++
-		log.Printf("[#%d] Received SendAlarmDigest request with userId: '%u'", messageCounter, message.UserID)
+		log.Printf("[#%d] Received SendAlarmDigest request with userId: '%u'", messageCounter, message.User_ID)
 
-		lastDigest, err := digestDao.GetLastDigest(message.UserID)
-		getAlarmsFrom := lastDigest.RequestedAt
+		lastDigest, err := digestDao.GetLastDigest(message.User_ID)
+		getAlarmsFrom := lastDigest.Requested_At
 		if err != nil {
 			minusOneMonth := time.Hour * -728
 			getAlarmsFrom = primitive.NewDateTimeFromTime(time.Now().Add(minusOneMonth))
@@ -40,7 +40,7 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 		digestDao.InsertDigest(message)
 
 
-		userAlarms, err := alarmDao.GetActiveAlarms(message.UserID, getAlarmsFrom)
+		userAlarms, err := alarmDao.GetActiveAlarms(message.User_ID, getAlarmsFrom)
 		if err != nil {
 			return
 		}
@@ -49,11 +49,11 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 		activeAlarms := []ActiveAlarm{}
 
 		for _, alarmChange := range userAlarms {
-			activeAlarm := ActiveAlarm{alarmChange.AlarmID, alarmChange.Status, alarmChange.ChangedAt.Time().UTC().String()}
+			activeAlarm := ActiveAlarm{alarmChange.Alarm_ID, alarmChange.Status, alarmChange.Changed_At.Time().UTC().String()}
 			activeAlarms = append(activeAlarms, activeAlarm)
 		}
 
-		alarmDigest := AlarmDigest{message.UserID, activeAlarms}
+		alarmDigest := AlarmDigest{message.User_ID, activeAlarms}
 
 		PublishMessage(config.Nats.AlarmDigestSubject, alarmDigest, config)
 	}

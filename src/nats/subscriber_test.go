@@ -18,10 +18,10 @@ func PublishMsg(subject string, body []byte) {
 	defer c.Close()
 
 	me := &dao.AlarmStatusChanged{
-		AlarmID: "2345",
-		UserID: "1234",
-		Status: "Critical",
-		ChangedAt: primitive.NewDateTimeFromTime(testTime),
+		Alarm_ID:   "2345",
+		User_ID:    "1234",
+		Status:     "Critical",
+		Changed_At: primitive.NewDateTimeFromTime(testTime),
 	}
 	c.Publish(subject, me)
 
