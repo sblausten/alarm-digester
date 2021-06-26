@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"github.com/sblausten/go-service/nats"
-	"github.com/sblausten/go-service/dao"
-	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/src/nats"
+	"github.com/sblausten/go-service/src/dao"
+	"github.com/sblausten/go-service/src/config"
 	"os/signal"
 	"syscall"
 )
@@ -23,18 +23,16 @@ func main() {
 
 	alarmsCollection := dao.GetCollection(dbClient, config.Db.Name, "alarms")
 	digestCollection := dao.GetCollection(dbClient, config.Db.Name, "digest")
-	dao.BuildAlarmIndexes(alarmsCollection)
-	dao.BuildDigestIndexes(digestCollection)
+	digestDao := dao.DigestDao{Collection: digestCollection}
+	alarmDao := dao.AlarmDao{Collection: alarmsCollection}
 
-	go nats.StartNatsSubscriber(
-			"AlarmStatusChanged",
-			config,
-			nats.AlarmStatusChangeHandler(alarmsCollection, ctx))
+	digestDao.BuildDigestIndexes()
+	alarmDao.BuildAlarmIndexes()
 
-	go nats.StartNatsSubscriber(
-			"SendAlarmDigest",
-			config,
-			nats.SendAlarmDigestHandler(digestCollection, alarmsCollection, ctx, config))
+	natsSubscriber := nats.NatsSubscriber{Config: config}
+
+	go natsSubscriber.StartSubscriber("AlarmStatusChanged", nats.AlarmStatusChangeHandler(alarmDao))
+	go natsSubscriber.StartSubscriber("SendAlarmDigest", nats.SendAlarmDigestHandler(digestDao, alarmDao, config))
 
 	var (
 		shutdown    = make(chan os.Signal, 1)

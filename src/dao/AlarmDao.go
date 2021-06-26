@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+type AlarmDaoInterface interface {
+	BuildAlarmIndexes()
+	InsertAlarm(alarm AlarmStatusChanged) (*mongo.InsertOneResult, error)
+	GetActiveAlarms(userId string, from primitive.DateTime) ([]AlarmStatusChanged, error)
+}
+
+type AlarmDao struct {
+	Collection *mongo.Collection
+}
+
 type AlarmStatusChanged struct {
 	_ID primitive.ObjectID
 	AlarmID string
@@ -19,7 +29,7 @@ type AlarmStatusChanged struct {
 	ChangedAt primitive.DateTime
 }
 
-func BuildAlarmIndexes(collection *mongo.Collection) {
+func (a AlarmDao) BuildAlarmIndexes() {
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 
 	indexModels := []mongo.IndexModel{
@@ -32,16 +42,16 @@ func BuildAlarmIndexes(collection *mongo.Collection) {
 			Options: nil,
 		},
 	}
-	indexes, err := collection.Indexes().CreateMany(ctx, indexModels)
+	indexes, err := a.Collection.Indexes().CreateMany(ctx, indexModels)
 	if err != nil {
 		log.Println("Error creating indexs:", err)
 	} else {
-		fmt.Printf("Created indexes %i on collection %c \n", indexes, collection.Name())
+		fmt.Printf("Created indexes %i on collection %c \n", indexes, a.Collection.Name())
 	}
 }
 
-func InsertAlarm(collection *mongo.Collection, alarm AlarmStatusChanged, ctx context.Context) (*mongo.InsertOneResult, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func (a AlarmDao) InsertAlarm(alarm AlarmStatusChanged) (*mongo.InsertOneResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	data, err := bson.Marshal(alarm)
@@ -50,10 +60,10 @@ func InsertAlarm(collection *mongo.Collection, alarm AlarmStatusChanged, ctx con
 	}
 
 	log.Printf("Inserting AlarmStatusChanged record: %r", string(data))
-	return collection.InsertOne(ctx, data)
+	return a.Collection.InsertOne(ctx, data)
 }
 
-func GetAlarms(collection *mongo.Collection, userId string, from primitive.DateTime) ([]AlarmStatusChanged, error) {
+func (a AlarmDao) GetActiveAlarms(userId string, from primitive.DateTime) ([]AlarmStatusChanged, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
@@ -64,9 +74,9 @@ func GetAlarms(collection *mongo.Collection, userId string, from primitive.DateT
 	var results []AlarmStatusChanged
 
 	filter := bson.D{{ "userid", userId }}
-	cur, err := collection.Find(ctx, filter, findOptions)
+	cur, err := a.Collection.Find(ctx, filter, findOptions)
 	if err != nil {
-		log.Printf("GetAlarms - lookup failed with Find error: %e", err)
+		log.Printf("GetActiveAlarms - lookup failed with Find error: %e", err)
 		return nil, err
 	}
 
@@ -74,7 +84,7 @@ func GetAlarms(collection *mongo.Collection, userId string, from primitive.DateT
 		var alarmChange AlarmStatusChanged
 		err := cur.Decode(&alarmChange)
 		if err != nil {
-			log.Printf("GetAlarms - lookup failed with Decode error: %e", err)
+			log.Printf("GetActiveAlarms - lookup failed with Decode error: %e", err)
 			return nil, err
 		}
 		if alarmChange.ChangedAt >= from {
@@ -83,7 +93,7 @@ func GetAlarms(collection *mongo.Collection, userId string, from primitive.DateT
 	}
 
 	if err := cur.Err(); err != nil {
-		log.Printf("GetAlarms - lookup failed with cursor error: %e", err)
+		log.Printf("GetActiveAlarms - lookup failed with cursor error: %e", err)
 	}
 
 	return results, err

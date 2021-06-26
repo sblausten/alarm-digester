@@ -2,7 +2,7 @@ package nats
 
 import (
 	"github.com/nats-io/nats.go"
-	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/src/config"
 	"log"
 )
 

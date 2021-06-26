@@ -11,13 +11,23 @@ import (
 	"time"
 )
 
+type DigestDaoInterface interface {
+	BuildDigestIndexes()
+	InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error)
+	GetLastDigest(userId string) (SendAlarmDigest, error)
+}
+
+type DigestDao struct {
+	Collection *mongo.Collection
+}
+
 type SendAlarmDigest struct {
 	_ID primitive.ObjectID
 	UserID string
 	RequestedAt primitive.DateTime
 }
 
-func BuildDigestIndexes(collection *mongo.Collection) {
+func (d DigestDao) BuildDigestIndexes() {
 	ctx, _ := context.WithTimeout(context.Background(), 60*time.Second)
 
 	indexModels := []mongo.IndexModel{
@@ -30,16 +40,16 @@ func BuildDigestIndexes(collection *mongo.Collection) {
 			Options: nil,
 		},
 	}
-	indexes, err := collection.Indexes().CreateMany(ctx, indexModels)
+	indexes, err := d.Collection.Indexes().CreateMany(ctx, indexModels)
 	if err != nil {
 		log.Println("Error creating indexs:", err)
 	} else {
-		fmt.Printf("Created indexes %i on collection %c \n", indexes, collection.Name())
+		fmt.Printf("Created indexes %i on collection %c \n", indexes, d.Collection.Name())
 	}
 }
 
-func InsertDigest(collection *mongo.Collection, digest SendAlarmDigest, ctx context.Context) (*mongo.InsertOneResult, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	digest.RequestedAt = primitive.NewDateTimeFromTime(time.Now().UTC())
@@ -50,7 +60,7 @@ func InsertDigest(collection *mongo.Collection, digest SendAlarmDigest, ctx cont
 	}
 
 	log.Printf("InsertDigest - inserting record: %r", string(data))
-	res, err := collection.InsertOne(ctx, data)
+	res, err := d.Collection.InsertOne(ctx, data)
 	if err != nil {
 		log.Printf("InsertDigest - insert failed with error: %e", err)
 	} else {
@@ -60,8 +70,8 @@ func InsertDigest(collection *mongo.Collection, digest SendAlarmDigest, ctx cont
 	return res, err
 }
 
-func GetLastDigest(collection *mongo.Collection, userId string, ctx context.Context) (SendAlarmDigest, error) {
-	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+func (d DigestDao) GetLastDigest(userId string) (SendAlarmDigest, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var lastDigest SendAlarmDigest
@@ -69,7 +79,7 @@ func GetLastDigest(collection *mongo.Collection, userId string, ctx context.Cont
 	findOptions := options.FindOne()
 	findOptions.SetSort(bson.D{{"requestedat", 1}})
 
-	err := collection.FindOne(ctx, filter, findOptions).Decode(&lastDigest)
+	err := d.Collection.FindOne(ctx, filter, findOptions).Decode(&lastDigest)
 	if err != nil {
 		log.Printf("GetLastDigest - lookup failed with error: %e", err)
 	} else {

@@ -2,23 +2,28 @@ package nats
 
 import (
 	"fmt"
-	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/src/config"
 	"log"
 	"time"
 
 	"github.com/nats-io/nats.go"
 )
 
-func StartNatsSubscriber(
-	subject string,
-	config config.Config,
-	messageHandler nats.Handler) {
+type NatsSubscriberInterface interface {
+	StartSubscriber(subject string, messageHandler nats.Handler)
+}
+
+type NatsSubscriber struct {
+	Config config.Config
+}
+
+func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Handler) {
 
 	subscriberName := fmt.Sprintln("%s Subscriber", subject)
 	opts := []nats.Option{nats.Name(subscriberName)}
 	opts = setupConnOptions(opts)
 
-	nc, err := nats.Connect(config.Nats.ServerAddress, opts...)
+	nc, err := nats.Connect(s.Config.Nats.ServerAddress, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -27,11 +32,8 @@ func StartNatsSubscriber(
 		log.Fatal(err)
 	}
 
-	encodedConnection.QueueSubscribe(subject, config.Nats.QueueGroup, messageHandler)
+	encodedConnection.QueueSubscribe(subject, s.Config.Nats.QueueGroup, messageHandler)
 	encodedConnection.Flush()
-
-	//if ctx.Done()
-	//encodedConnection.Drain()
 
 	if err := nc.LastError(); err != nil {
 		log.Fatal(err)
