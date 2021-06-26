@@ -22,9 +22,8 @@ type DigestDao struct {
 }
 
 type SendAlarmDigest struct {
-	_ID          primitive.ObjectID
-	User_ID      string
-	Requested_At primitive.DateTime
+	UserId      string `json:"userId" bson:"userId"`
+	RequestedAt primitive.DateTime `json:"requestedAt" bson:"requestedAt"`
 }
 
 func (d DigestDao) BuildDigestIndexes() {
@@ -32,11 +31,11 @@ func (d DigestDao) BuildDigestIndexes() {
 
 	indexModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"requested_at": 1},
+			Keys: bson.M{"requestedAt": 1},
 			Options: nil,
 		},
 		{
-			Keys: bson.M{"user_id": 1},
+			Keys: bson.M{"userId": 1},
 			Options: nil,
 		},
 	}
@@ -52,7 +51,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	digest.Requested_At = primitive.NewDateTimeFromTime(time.Now().UTC())
+	digest.RequestedAt = primitive.NewDateTimeFromTime(time.Now().UTC())
 
 	data, err := bson.Marshal(digest)
 	if err != nil {
@@ -64,7 +63,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 	if err != nil {
 		log.Printf("InsertDigest - insert failed with error: %e", err)
 	} else {
-		log.Printf("InsertDigest - successfully inserted Digest %i \n", res.InsertedID)
+		log.Printf("InsertDigest - successfully inserted Digest %i \n", res)
 	}
 
 	return res, err
@@ -75,9 +74,9 @@ func (d DigestDao) GetLastDigest(userId string) (SendAlarmDigest, error) {
 	defer cancel()
 
 	var lastDigest SendAlarmDigest
-	filter := bson.D{{"user_id", userId}}
+	filter := bson.D{{"userId", userId}}
 	findOptions := options.FindOne()
-	findOptions.SetSort(bson.D{{"requested_at", 1}})
+	findOptions.SetSort(bson.D{{"requestedAt", 1}})
 
 	err := d.Collection.FindOne(ctx, filter, findOptions).Decode(&lastDigest)
 	if err != nil {

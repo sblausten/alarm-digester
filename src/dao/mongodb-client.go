@@ -42,6 +42,6 @@ func getConnectionUrl(config config.Config) string {
 		if config.Db.Password == "" {
 			log.Fatalf("No password found. Cannot connect to remote db in env: %e", config.Env)
 		}
-		return strings.Replace(config.Db.RemoteAddress, "<password>", config.Db.Password, 0)
+		return strings.Replace(config.Db.Address, "<password>", config.Db.Password, 0)
 	}
 }

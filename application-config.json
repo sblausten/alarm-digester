@@ -2,11 +2,12 @@
   "Db": {
     "Name": "alarm-digest",
     "LocalAddress": "mongodb://localhost:27017",
-    "RemoteAddress": "mongodb+srv://netdata-test:<password>@cluster0.1un1e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority",
     "Address": "mongodb+srv://netdata-test:<password>@cluster0.1un1e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
   },
   "Nats": {
     "QueueGroup": "alarm-digester-1",
-    "AlarmDigestSubject": "AlarmDigest"
+    "SubscriberSubjectSendAlarmDigest": "SendAlarmDigest",
+    "SubscriberSubjectAlarmStatusChange": "AlarmStatusChanged",
+    "ProducerSubjectAlarmDigest": "AlarmDigest"
   }
 }

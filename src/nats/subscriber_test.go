@@ -17,11 +17,11 @@ func PublishMsg(subject string, body []byte) {
 	c, _ := nats.NewEncodedConn(nc, "json")
 	defer c.Close()
 
-	me := &dao.AlarmStatusChanged{
-		Alarm_ID:   "2345",
-		User_ID:    "1234",
-		Status:     "Critical",
-		Changed_At: primitive.NewDateTimeFromTime(testTime),
+	me := &dao.AlarmStatusChangeEvent{
+		Alarm_ID:  "2345",
+		UserID:    "1234",
+		Status:    "Critical",
+		ChangedAt: primitive.NewDateTimeFromTime(testTime),
 	}
 	c.Publish(subject, me)
 

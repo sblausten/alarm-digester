@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"context"
 	"github.com/sblausten/go-service/src/config"
 	"github.com/sblausten/go-service/src/dao"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -8,31 +9,33 @@ import (
 	"time"
 )
 
-func AlarmStatusChangeHandler(alarmDao dao.AlarmDaoInterface) func(message dao.AlarmStatusChanged) {
+func AlarmStatusChangeHandler(alarmDao dao.AlarmDaoInterface) func(message dao.AlarmStatusChangeEvent) {
 	messageCounter := 0
 
-	return func(message dao.AlarmStatusChanged) {
+	return func(message dao.AlarmStatusChangeEvent) {
 		messageCounter++
-		log.Printf("[#%d] Received AlarmStatusChanged for [%s] with alarmId: '%s'", messageCounter, message.Changed_At, message.Alarm_ID)
+		log.Printf("[#%d] Received AlarmStatusChangeEvent for [%s] with alarmId: '%s'", messageCounter, message.ChangedAt, message.AlarmID)
 
 		_, err := alarmDao.InsertAlarm(message)
 		if err != nil {
-			log.Printf("Failed to save AlarmStatusChanged message with alarmId: %a for user: %u", message.Alarm_ID, message.User_ID)
+			log.Printf("Failed to save AlarmStatusChangeEvent message with alarmId: %a for user: %u", message.AlarmID, message.UserID)
 		} else {
-			log.Printf("Saved AlarmStatusChanged message with alarmId: %a for user: %u", message.Alarm_ID, message.User_ID)
+			log.Printf("Saved AlarmStatusChangeEvent message with alarmId: %a for user: %u", message.AlarmID, message.UserID)
 		}
 	}
 }
 
 func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.AlarmDaoInterface, config config.Config) func(message dao.SendAlarmDigest) {
 	messageCounter := 0
-
 	return func(message dao.SendAlarmDigest) {
-		messageCounter++
-		log.Printf("[#%d] Received SendAlarmDigest request with userId: '%u'", messageCounter, message.User_ID)
+		_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
 
-		lastDigest, err := digestDao.GetLastDigest(message.User_ID)
-		getAlarmsFrom := lastDigest.Requested_At
+		messageCounter++
+		log.Printf("[#%d] Received SendAlarmDigest request with userId: '%u'", messageCounter, message.UserId)
+
+		lastDigest, err := digestDao.GetLastDigest(message.UserId)
+		getAlarmsFrom := lastDigest.RequestedAt
 		if err != nil {
 			minusOneMonth := time.Hour * -728
 			getAlarmsFrom = primitive.NewDateTimeFromTime(time.Now().Add(minusOneMonth))
@@ -40,21 +43,21 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 		digestDao.InsertDigest(message)
 
 
-		userAlarms, err := alarmDao.GetActiveAlarms(message.User_ID, getAlarmsFrom)
+		userAlarms, err := alarmDao.GetActiveAlarms(message.UserId, getAlarmsFrom)
 		if err != nil {
 			return
 		}
 
 
-		activeAlarms := []ActiveAlarm{}
+		activeAlarms := []dao.AlarmStatusChangeUpdate{}
 
 		for _, alarmChange := range userAlarms {
-			activeAlarm := ActiveAlarm{alarmChange.Alarm_ID, alarmChange.Status, alarmChange.Changed_At.Time().UTC().String()}
-			activeAlarms = append(activeAlarms, activeAlarm)
+			activeAlarms = append(activeAlarms, alarmChange)
 		}
 
-		alarmDigest := AlarmDigest{message.User_ID, activeAlarms}
+		alarmDigest := AlarmDigest{message.UserId, activeAlarms}
 
-		PublishMessage(config.Nats.AlarmDigestSubject, alarmDigest, config)
+		PublishMessage(config.Nats.ProducerSubjectAlarmDigest, alarmDigest, config)
+		return
 	}
 }

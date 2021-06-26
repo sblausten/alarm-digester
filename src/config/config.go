@@ -17,15 +17,16 @@ type Config struct {
 type DBConfig struct {
 	Name string
 	LocalAddress string
-	RemoteAddress string
 	Address   string
 	Password  string
 }
 
 type NatsConfig struct {
-	QueueGroup string
-	AlarmDigestSubject string
-	ServerAddress string
+	QueueGroup                         string
+	SubscriberSubjectSendAlarmDigest   string
+	SubscriberSubjectAlarmStatusChange string
+	ProducerSubjectAlarmDigest         string
+	ServerAddress                      string
 }
 
 func BuildConfig() Config {
