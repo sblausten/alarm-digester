@@ -49,7 +49,7 @@ func (a AlarmDao) BuildAlarmIndexes() {
 	if err != nil {
 		log.Println("BuildAlarmIndexes - Error creating indexes:", err)
 	} else {
-		log.Printf("BuildAlarmIndexes - Created indexes %i on collection %c \n", indexes, a.Collection.Name())
+		log.Printf("BuildAlarmIndexes - Created indexes %v on collection %s \n", indexes, a.Collection.Name())
 	}
 }
 
@@ -86,10 +86,9 @@ func (a AlarmDao) GetActiveAlarms(userId string, from int64) ([]AlarmStatusChang
 	defer cancel()
 
 	timeFromFormatted := util.ConvertUnixToFormatted(from)
-	log.Printf("GetActiveAlarms - Getting active alarms for %u from %t", userId, timeFromFormatted)
+	log.Printf("GetActiveAlarms - Getting active alarms for %s from %s", userId, timeFromFormatted)
 
 	findOptions := options.Find()
-	findOptions.SetLimit(50)
 	findOptions.SetSort(bson.D{{"changedAt", 1}})
 
 	var results []AlarmStatusChangeEvent

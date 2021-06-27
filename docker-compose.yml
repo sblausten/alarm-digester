@@ -1,0 +1,31 @@
+version: "3"
+services:
+  nats:
+    image: nats
+    container_name: test-nats
+    expose:
+      - "4222"
+    ports:
+      - "4222:4222"
+      - "8222:8222"
+  mongodb:
+    image: mongo:4.2
+    container_name: test-db
+    environment:
+      - PUID=1000
+      - PGID=1000
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+  digester:
+    image: sblausten/alarm-digester:latest
+    build: .
+    restart: on-failure
+    links:
+      - nats
+      - mongodb
+    environment:
+      - "ENV=test"
+    depends_on:
+      - mongodb
+      - nats

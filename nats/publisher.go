@@ -8,14 +8,14 @@ import (
 )
 
 type PublisherInterface interface {
-	PublishMessage(subject string, message models.AlarmDigest)
+	PublishMessage(subject string, message models.AlarmDigest) error
 }
 
 type Publisher struct {
 	Config config.Config
 }
 
-func (p Publisher) PublishMessage(subject string, message models.AlarmDigest) {
+func (p Publisher) PublishMessage(subject string, message models.AlarmDigest) error {
 	opts := []nats.Option{nats.Name("AlarmDigest Publisher")}
 
 	nc, err := nats.Connect(p.Config.Nats.ServerAddress, opts...)
@@ -36,4 +36,6 @@ func (p Publisher) PublishMessage(subject string, message models.AlarmDigest) {
 	} else {
 		log.Printf("PublishMessage - published digest to subject %s with %d alarms", subject, len(message.ActiveAlarms))
 	}
+
+	return err
 }

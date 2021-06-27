@@ -43,7 +43,7 @@ func (d DigestDao) BuildDigestIndexes() {
 	if err != nil {
 		log.Println("BuildDigestIndexes - Error creating indexes:", err)
 	} else {
-		log.Printf("BuildDigestIndexes - Created indexes %i on collection %c \n", indexes, d.Collection.Name())
+		log.Printf("BuildDigestIndexes - Created indexes %v on collection %s \n", indexes, d.Collection.Name())
 	}
 }
 
@@ -57,12 +57,11 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) error {
 		return err
 	}
 
-	log.Printf("InsertDigest - saving digest request for user: %u", digest.UserId)
-	res, err := d.Collection.InsertOne(ctx, data)
+	_, err = d.Collection.InsertOne(ctx, data)
 	if err != nil {
 		log.Printf("InsertDigest - insert failed with error: %e", err)
 	} else {
-		log.Printf("InsertDigest - successfully inserted Digest %i \n", res)
+		log.Printf("InsertDigest - inserted new digest record for user: %+v", digest)
 	}
 
 	return err
@@ -81,7 +80,7 @@ func (d DigestDao) GetLastDigest(userId string) (SendAlarmDigest, error) {
 	if err != nil {
 		log.Printf("GetLastDigest - lookup failed with error: %e", err)
 	} else {
-		log.Printf("GetLastDigest - Found previous Digest: %+v\n", lastDigest)
+		log.Printf("GetLastDigest - found previous digest request for user: %+v\n", lastDigest)
 	}
 
 	return lastDigest, err

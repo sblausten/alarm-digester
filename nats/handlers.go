@@ -44,11 +44,6 @@ func SendAlarmDigestHandler(
 			getAlarmsFrom = time.Now().UTC().Add(minusOneMonth).UnixNano()
 			log.Printf("SendAlarmDigestHandler - Fetching alarms from one month ago %d", getAlarmsFrom)
 		}
-		err = digestDao.InsertDigest(message)
-		if err != nil {
-			log.Printf("SendAlarmDigestHandler - Error inserting digest request user %s: %v", message.UserId, err)
-			return
-		}
 
 		userAlarms, err := alarmDao.GetActiveAlarms(message.UserId, getAlarmsFrom)
 		if err != nil {
@@ -74,6 +69,15 @@ func SendAlarmDigestHandler(
 
 		alarmDigest := models.AlarmDigest{message.UserId, activeAlarms}
 
-		publisher.PublishMessage(config.Nats.ProducerSubjectAlarmDigest, alarmDigest)
+		err = publisher.PublishMessage(config.Nats.ProducerSubjectAlarmDigest, alarmDigest)
+		if err != nil {
+			log.Printf("SendAlarmDigestHandler - Failed to produce AlarmDigest for user %s with: %v", message.UserId, err)
+			return
+		}
+
+		err = digestDao.InsertDigest(message)
+		if err != nil {
+			log.Printf("SendAlarmDigestHandler - Error recording digest request user %s: %v", message.UserId, err)
+		}
 	}
 }

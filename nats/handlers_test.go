@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-var requestedAt int64 = time.Now().UnixNano()
-var formatedTime string = time.Unix(0, requestedAt).UTC().Format(time.RFC3339Nano)
+var unixTimestamp int64 = time.Now().UnixNano()
+var formattedTimestamp string = time.Unix(0, unixTimestamp).UTC().Format(time.RFC3339Nano)
 
-//
+// Mocks
 type MockDigestDao struct {
 	Collection *mongo.Collection
 }
@@ -23,11 +23,11 @@ type MockAlarmDao struct {
 }
 
 func (d MockDigestDao) BuildDigestIndexes() {}
-func (d MockDigestDao) InsertDigest(digest dao.SendAlarmDigest) error {
+func (d MockDigestDao) InsertDigest(dao.SendAlarmDigest) error {
 	return nil
 }
 func (d MockDigestDao) GetLastDigest(userId string) (dao.SendAlarmDigest, error) {
-	digest := dao.SendAlarmDigest{UserId: userId, RequestedAt: requestedAt}
+	digest := dao.SendAlarmDigest{UserId: userId, RequestedAt: unixTimestamp}
 	return digest, nil
 }
 
@@ -35,14 +35,13 @@ func (d MockAlarmDao) BuildAlarmIndexes() {}
 func (d MockAlarmDao) UpsertAlarm(alarm models.AlarmStatusChangeMessage) error {
 	return nil
 }
-func (d MockAlarmDao) GetActiveAlarms(userId string, from int64) ([]dao.AlarmStatusChangeEvent, error) {
+func (d MockAlarmDao) GetActiveAlarms(string, int64) ([]dao.AlarmStatusChangeEvent, error) {
 	events := getTwoAlarms()
-
 	return events, nil
 }
 
 func getTwoAlarms() []dao.AlarmStatusChangeEvent {
-	event1 := dao.AlarmStatusChangeEvent{AlarmID: "1", UserID: "1", Status: "CRITICAL", ChangedAt: requestedAt}
+	event1 := dao.AlarmStatusChangeEvent{AlarmID: "1", UserID: "1", Status: "CRITICAL", ChangedAt: unixTimestamp}
 	event2 := event1
 	event2.AlarmID = "2"
 	events := []dao.AlarmStatusChangeEvent{event1, event2}
@@ -50,20 +49,22 @@ func getTwoAlarms() []dao.AlarmStatusChangeEvent {
 }
 
 func getTwoMessageAlarms() []models.ActiveAlarm {
-	event1 := models.ActiveAlarm{AlarmID: "1", Status: "CRITICAL", LatestChangedAt: formatedTime}
+	event1 := models.ActiveAlarm{AlarmID: "1", Status: "CRITICAL", LatestChangedAt: formattedTimestamp}
 	event2 := event1
 	event2.AlarmID = "2"
 	events := []models.ActiveAlarm{event1, event2}
 	return events
 }
 
+
+// Tests
 func TestSendAlarmDigestHandler_PublishesAlarms(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	userId := "1"
 
 	config := config.Config{Nats: config.NatsConfig{ProducerSubjectAlarmDigest: "Send"}}
-	message := dao.SendAlarmDigest{UserId: userId, RequestedAt: requestedAt}
+	message := dao.SendAlarmDigest{UserId: userId, RequestedAt: unixTimestamp}
 
 	activeAlarms := getTwoMessageAlarms()
 	expected := models.AlarmDigest{
@@ -87,7 +88,7 @@ func TestAlarmStatusChangeHandler_SavesAlarm(t *testing.T) {
 		UserID:    "1",
 		AlarmID:   "2",
 		Status:    "WARNING",
-		ChangedAt: formatedTime,
+		ChangedAt: formattedTimestamp,
 	}
 	mockAlarmDao := mocks.NewMockAlarmDaoInterface(ctrl)
 	mockAlarmDao.EXPECT().

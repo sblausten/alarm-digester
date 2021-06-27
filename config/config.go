@@ -5,20 +5,18 @@ import (
 	"github.com/nats-io/nats.go"
 	"log"
 	"os"
-	"strings"
 )
 
 type Config struct {
-	Db  DBConfig
-	Env string
+	Db   DBConfig
+	Env  string
 	Nats NatsConfig
 }
 
 type DBConfig struct {
-	Name string
-	LocalAddress string
-	Address   string
-	Password  string
+	Name                string
+	LocalAddress        string
+	DockerServerAddress string
 }
 
 type NatsConfig struct {
@@ -27,30 +25,42 @@ type NatsConfig struct {
 	SubscriberSubjectAlarmStatusChange string
 	ProducerSubjectAlarmDigest         string
 	ServerAddress                      string
+	DockerServerAddress                string
 }
 
 func (c Config) Build() Config {
 	config := loadFrom("application-config.json")
 
 	env, envIsPresent := os.LookupEnv("ENV")
-	password, dbPasswordIsPresent := os.LookupEnv("ALARM_DIGEST_DB_PASSWORD")
 	if !envIsPresent || env == "" {
 		env = "dev"
-	}
-	if !dbPasswordIsPresent && env != "dev" {
-		log.Fatal("Cannot connect to db as env: ALARM_DIGEST_DB_PASSWORD not found")
 	}
 
 	config.Env = env
 	log.Println("Running with env:", env)
-	config.Db.Password = password
-	config.Db.Address = strings.Replace(config.Db.Address, "<password>", password, 1)
 
-	if config.Nats.ServerAddress == "" {
-		config.Nats.ServerAddress = nats.DefaultURL
-	}
+	setNatsAddress(&config)
 
 	return config
+}
+
+func setNatsAddress(config *Config) {
+	switch config.Env {
+	case "test":
+		log.Printf("Config - setting nats server address to docker address %s", config.Nats.DockerServerAddress)
+		config.Nats.ServerAddress = config.Nats.DockerServerAddress
+	default:
+		config.Nats.ServerAddress = nats.DefaultURL
+	}
+}
+
+func (d DBConfig) GetAddress(config Config) string {
+	switch config.Env {
+	case "test":
+		return config.Db.DockerServerAddress
+	default:
+		return config.Db.LocalAddress
+	}
 }
 
 func loadFrom(path string) Config {
@@ -60,7 +70,7 @@ func loadFrom(path string) Config {
 	}
 	defer file.Close()
 
-	configuration := Config {}
+	configuration := Config{}
 
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&configuration)

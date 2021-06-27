@@ -32,8 +32,8 @@ func main() {
 	natsSubscriber := nats.NatsSubscriber{Config: config, Context: ctx}
 	natsPublisher := nats.Publisher{Config: config}
 
-	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectAlarmStatusChange, nats.AlarmStatusChangeHandler(alarmDao))
-	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectSendAlarmDigest, nats.SendAlarmDigestHandler(digestDao, alarmDao, natsPublisher, config))
+	go natsSubscriber.Subscribe(config.Nats.SubscriberSubjectAlarmStatusChange, nats.AlarmStatusChangeHandler(alarmDao))
+	go natsSubscriber.Subscribe(config.Nats.SubscriberSubjectSendAlarmDigest, nats.SendAlarmDigestHandler(digestDao, alarmDao, natsPublisher, config))
 
 	var (
 		shutdown    = make(chan os.Signal, 1)

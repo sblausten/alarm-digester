@@ -2,12 +2,13 @@
   "Db": {
     "Name": "alarm-digest",
     "LocalAddress": "mongodb://localhost:27017",
-    "Address": "mongodb+srv://netdata-test:<password>@cluster0.1un1e.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    "DockerServerAddress": "mongodb://test-db:27017"
   },
   "Nats": {
     "QueueGroup": "alarm-digester-1",
     "SubscriberSubjectSendAlarmDigest": "SendAlarmDigest",
     "SubscriberSubjectAlarmStatusChange": "AlarmStatusChanged",
-    "ProducerSubjectAlarmDigest": "AlarmDigest"
+    "ProducerSubjectAlarmDigest": "AlarmDigest",
+    "DockerServerAddress": "nats://nats:4222"
   }
 }

@@ -11,7 +11,7 @@ import (
 )
 
 type NatsSubscriberInterface interface {
-	StartSubscriber(subject string, messageHandler nats.Handler)
+	Subscribe(subject string, messageHandler nats.Handler) error
 }
 
 type NatsSubscriber struct {
@@ -19,33 +19,37 @@ type NatsSubscriber struct {
 	Context context.Context
 }
 
-func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Handler) {
+func (s NatsSubscriber) Subscribe(subject string, messageHandler nats.Handler) {
 
 	subscriberName := fmt.Sprintf("%s Subscriber", subject)
 	opts := []nats.Option{nats.Name(subscriberName)}
 	opts = setupConnOptions(opts)
 
+	log.Printf( "Subscribe - connecting to Nats server at %s", s.Config.Nats.ServerAddress)
 	nc, err := nats.Connect(s.Config.Nats.ServerAddress, opts...)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf( "Subscribe - Failed to connect to Nats server: %v", err)
 	}
 	encodedConnection, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf( "Subscribe - Failed to encode connection to Nats server: %v", err)
 	}
 
-	encodedConnection.QueueSubscribe(subject, s.Config.Nats.QueueGroup, messageHandler)
-	encodedConnection.Flush()
-	log.Printf( "Subscribed to Nats server for subject: %s \n", subject)
-
-	if err := nc.LastError(); err != nil {
-		nc.Drain()
-		log.Fatal(err)
+	sub, err := encodedConnection.QueueSubscribe(subject, s.Config.Nats.QueueGroup, messageHandler)
+	if err != nil {
+		log.Printf( "Subscribe - Failed to subscribe to subject: %s with error: %v", subject, err)
 	}
+
+	err = encodedConnection.Flush()
+	if err != nil {
+		log.Printf( "Subscribe - Failed communicate with Nats server: %v", err)
+	}
+
+	log.Printf( "Subscribe - Subscribed to Nats server for subject: %s \n", subject)
 
 	select {
 	case <-s.Context.Done():
-		if err := nc.Drain(); err != nil {
+		if err := sub.Drain(); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -72,7 +76,7 @@ func setupConnOptions(opts []nats.Option) []nats.Option {
 		}
 	}))
 	opts = append(opts, nats.ClosedHandler(func(nc *nats.Conn) {
-		log.Fatalf("Exiting: %v", nc.LastError())
+		log.Fatalf("Subscribe - Error on connection to Nats server: %v", nc.LastError())
 	}))
 	return opts
 }
