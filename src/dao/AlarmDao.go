@@ -47,9 +47,9 @@ func (a AlarmDao) BuildAlarmIndexes() {
 	}
 	indexes, err := a.Collection.Indexes().CreateMany(ctx, indexModels)
 	if err != nil {
-		log.Println("Error creating indexes:", err)
+		log.Println("BuildAlarmIndexes - Error creating indexes:", err)
 	} else {
-		log.Printf("Created indexes %i on collection %c \n", indexes, a.Collection.Name())
+		log.Printf("BuildAlarmIndexes - Created indexes %i on collection %c \n", indexes, a.Collection.Name())
 	}
 }
 
@@ -86,7 +86,7 @@ func (a AlarmDao) GetActiveAlarms(userId string, from int64) ([]AlarmStatusChang
 	defer cancel()
 
 	timeFromFormatted := util.ConvertUnixToFormatted(from)
-	log.Printf("Getting active alarms for %u from %t", userId, timeFromFormatted)
+	log.Printf("GetActiveAlarms - Getting active alarms for %u from %t", userId, timeFromFormatted)
 
 	findOptions := options.Find()
 	findOptions.SetLimit(50)

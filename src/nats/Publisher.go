@@ -21,8 +21,6 @@ func PublishMessage(subject string, message models.AlarmDigest, config config.Co
 	ec.BindSendChan(subject, requestChanSend)
 
 	requestChanSend <- &message
-
-	//nc.Publish(subject, message)
 	nc.Flush()
 
 	if err := nc.LastError(); err != nil {

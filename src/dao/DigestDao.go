@@ -39,17 +39,17 @@ func (d DigestDao) BuildDigestIndexes() {
 			Options: nil,
 		},
 	}
+
 	indexes, err := d.Collection.Indexes().CreateMany(ctx, indexModels)
 	if err != nil {
-		log.Println("Error creating indexs:", err)
+		log.Println("BuildDigestIndexes - Error creating indexes:", err)
 	} else {
-		fmt.Printf("Created indexes %i on collection %c \n", indexes, d.Collection.Name())
+		fmt.Printf("BuildDigestIndexes - Created indexes %i on collection %c \n", indexes, d.Collection.Name())
 	}
 }
 
 func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
 
 	digest.RequestedAt = util.GetCurrentUTCTimeAsUnixNano()
 
@@ -58,7 +58,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 		return nil, err
 	}
 
-	log.Printf("InsertDigest - inserting record: %r", string(data))
+	log.Printf("InsertDigest - saving digest request for user: %u", digest.UserId)
 	res, err := d.Collection.InsertOne(ctx, data)
 	if err != nil {
 		log.Printf("InsertDigest - insert failed with error: %e", err)
