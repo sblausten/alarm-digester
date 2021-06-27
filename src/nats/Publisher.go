@@ -3,10 +3,11 @@ package nats
 import (
 	"github.com/nats-io/nats.go"
 	"github.com/sblausten/go-service/src/config"
+	"github.com/sblausten/go-service/src/models"
 	"log"
 )
 
-func PublishMessage(subject string, message AlarmDigest, config config.Config) {
+func PublishMessage(subject string, message models.AlarmDigest, config config.Config) {
 	opts := []nats.Option{nats.Name("AlarmDigest Publisher")}
 
 	nc, err := nats.Connect(config.Nats.ServerAddress, opts...)
@@ -16,7 +17,7 @@ func PublishMessage(subject string, message AlarmDigest, config config.Config) {
 	}
 	defer nc.Close()
 
-	requestChanSend := make(chan *AlarmDigest)
+	requestChanSend := make(chan *models.AlarmDigest)
 	ec.BindSendChan(subject, requestChanSend)
 
 	requestChanSend <- &message

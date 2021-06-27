@@ -2,9 +2,8 @@ package dao
 
 import (
 	"context"
-	"fmt"
+	"github.com/sblausten/go-service/src/models"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -13,8 +12,8 @@ import (
 
 type AlarmDaoInterface interface {
 	BuildAlarmIndexes()
-	InsertAlarm(alarm AlarmStatusChangeEvent) (*mongo.InsertOneResult, error)
-	GetActiveAlarms(userId string, from primitive.DateTime) ([]AlarmStatusChangeUpdate, error)
+	InsertAlarm(alarm models.AlarmStatusChangeMessage) (*mongo.InsertOneResult, error)
+	GetActiveAlarms(userId string, from int64) ([]AlarmStatusChangeEvent, error)
 }
 
 type AlarmDao struct {
@@ -22,17 +21,10 @@ type AlarmDao struct {
 }
 
 type AlarmStatusChangeEvent struct {
-	AlarmID   string             `json:"alarmId" bson:"alarmId"`
-	UserID    string             `json:"userId" bson:"userId"`
-	Status    string             `json:"status" bson:"status"`
-	ChangedAt primitive.DateTime `json:"changedAt" bson:"changedAt"`
-}
-
-type AlarmStatusChangeUpdate struct {
-	AlarmID         string             `json:"alarmId" bson:"alarmId"`
-	UserID          string             `json:"userId" bson:"userId"`
-	Status          string             `json:"status" bson:"status"`
-	LatestChangedAt primitive.DateTime `json:"latestChangedAt" bson:"changedAt"`
+	AlarmID   string `bson:"alarmId"`
+	UserID    string `bson:"userId"`
+	Status    string `bson:"status"`
+	ChangedAt int64  `bson:"changedAt"`
 }
 
 func (a AlarmDao) BuildAlarmIndexes() {
@@ -40,15 +32,15 @@ func (a AlarmDao) BuildAlarmIndexes() {
 
 	indexModels := []mongo.IndexModel{
 		{
-			Keys: bson.M{"changedAt": 1},
+			Keys:    bson.M{"changedAt": 1},
 			Options: nil,
 		},
 		{
-			Keys: bson.M{"userId": 1},
+			Keys:    bson.M{"userId": 1},
 			Options: nil,
 		},
 		{
-			Keys: bson.M{"status": 1},
+			Keys:    bson.M{"status": 1},
 			Options: nil,
 		},
 	}
@@ -56,36 +48,47 @@ func (a AlarmDao) BuildAlarmIndexes() {
 	if err != nil {
 		log.Println("Error creating indexs:", err)
 	} else {
-		fmt.Printf("Created indexes %i on collection %c \n", indexes, a.Collection.Name())
+		log.Printf("Created indexes %i on collection %c \n", indexes, a.Collection.Name())
 	}
 }
 
-func (a AlarmDao) InsertAlarm(alarm AlarmStatusChangeEvent) (*mongo.InsertOneResult, error) {
+func (a AlarmDao) InsertAlarm(alarmMessage models.AlarmStatusChangeMessage) (*mongo.InsertOneResult, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	//data, err := bson.Marshal(alarm)
-	//if err != nil {
-	//	return nil, err
-	//}
+	time, err := time.Parse(time.RFC3339Nano, alarmMessage.ChangedAt)
+	if err != nil {
+		log.Println("InsertAlarm - Error parsing timestamp:", err)
+		return nil, err
+	}
+
+	unixTime := time.Unix()
+	alarm := AlarmStatusChangeEvent{
+		AlarmID:   alarmMessage.AlarmID,
+		UserID:    alarmMessage.UserID,
+		Status:    alarmMessage.Status,
+		ChangedAt: unixTime,
+	}
 
 	log.Printf("Inserting AlarmStatusChangeEvent record: %r", alarm)
 	return a.Collection.InsertOne(ctx, alarm)
 }
 
-func (a AlarmDao) GetActiveAlarms(userId string, from primitive.DateTime) ([]AlarmStatusChangeUpdate, error) {
+func (a AlarmDao) GetActiveAlarms(userId string, from int64) ([]AlarmStatusChangeEvent, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
+	log.Printf("Getting active alarms for %u from %t", userId, time.Unix(0, from).UTC().Format(time.RFC3339))
+
 	findOptions := options.Find()
 	findOptions.SetLimit(50)
-	findOptions.SetSort(bson.D{{ "changedAt", 1}})
+	findOptions.SetSort(bson.D{{"changedAt", 1}})
 
-	var results []AlarmStatusChangeUpdate
+	var results []AlarmStatusChangeEvent
 
 	filter := bson.D{
-		{ "userId", userId },
-		{"changedAt", bson.M{"$gt": from} },
+		{"userId", userId},
+		//{"changedAt", bson.M{"$gt": from}},
 		{"$or", []bson.M{
 			bson.M{"status": "CRITICAL"},
 			bson.M{"status": "ALARM"},
@@ -98,15 +101,14 @@ func (a AlarmDao) GetActiveAlarms(userId string, from primitive.DateTime) ([]Ala
 	}
 
 	for cur.Next(ctx) {
-		var alarmChange AlarmStatusChangeUpdate
-		err := cur.Decode(&alarmChange)
+		var alarm AlarmStatusChangeEvent
+		err := cur.Decode(&alarm)
 		if err != nil {
 			log.Printf("GetActiveAlarms - lookup failed with Decode error: %e", err)
 			return nil, err
 		}
-		if alarmChange.LatestChangedAt >= from {
-			results = append(results, alarmChange)
-		}
+
+		results = append(results, alarm)
 	}
 
 	if err := cur.Err(); err != nil {

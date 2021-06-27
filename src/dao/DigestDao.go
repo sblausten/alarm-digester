@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -23,7 +22,7 @@ type DigestDao struct {
 
 type SendAlarmDigest struct {
 	UserId      string `json:"userId" bson:"userId"`
-	RequestedAt primitive.DateTime `json:"requestedAt" bson:"requestedAt"`
+	RequestedAt int64 `json:"requestedAt" bson:"requestedAt"`
 }
 
 func (d DigestDao) BuildDigestIndexes() {
@@ -51,7 +50,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	digest.RequestedAt = primitive.NewDateTimeFromTime(time.Now().UTC())
+	digest.RequestedAt = time.Now().UTC().UnixNano()
 
 	data, err := bson.Marshal(digest)
 	if err != nil {
