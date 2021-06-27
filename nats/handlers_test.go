@@ -5,68 +5,95 @@ import (
 	"github.com/sblausten/go-service/mocks"
 	"github.com/sblausten/go-service/config"
 	"github.com/sblausten/go-service/dao"
+	"github.com/sblausten/go-service/models"
+	"go.mongodb.org/mongo-driver/mongo"
 	"testing"
 	"time"
 )
 
-//var requestedAt int64 = time.Now().UnixNano()
-//
-//type MockDigestDao struct {
-//	Collection *mongo.Collection
-//}
-//type MockAlarmDao struct {
-//	Collection *mongo.Collection
-//}
-//type MockPublisher struct {
-//	Config config.Config
-//}
-//
-//func (d MockDigestDao) BuildDigestIndexes() {}
-//func (d MockDigestDao) InsertDigest(digest dao.SendAlarmDigest) (error) {
-//	return nil
-//}
-//func (d MockDigestDao) GetLastDigest(userId string) (dao.SendAlarmDigest, error) {
-//
-//	digest := dao.SendAlarmDigest{UserId: userId, RequestedAt: requestedAt}
-//	return digest, nil
-//}
-//
-//func (d MockAlarmDao) BuildAlarmIndexes() {}
-//func (d MockAlarmDao) UpsertAlarm(alarm models.AlarmStatusChangeMessage) error {
-//	return nil
-//}
-//func (d MockAlarmDao) GetActiveAlarms(userId string, from int64) ([]dao.AlarmStatusChangeEvent, error) {
-//	event1 := dao.AlarmStatusChangeEvent{AlarmID: "1", UserID: "1", Status: "CRITICAL", ChangedAt: requestedAt}
-//	event2 := event1
-//	event2.AlarmID = "2"
-//	events := []dao.AlarmStatusChangeEvent{event1, event2}
-//
-//	return events, nil
-//}
-//
-//func (p MockPublisher) PublishMessage(subject string, message models.AlarmDigest)  {}
-//
+var requestedAt int64 = time.Now().UnixNano()
+var formatedTime string = time.Unix(0, requestedAt).UTC().Format(time.RFC3339Nano)
 
-//func TestAlarmStatusChangeHandler_InsertsAlarm(*testing.T) {
 //
-//	handler := AlarmStatusChangeHandler(MockAlarmDao{})
-//
-//}
+type MockDigestDao struct {
+	Collection *mongo.Collection
+}
+type MockAlarmDao struct {
+	Collection *mongo.Collection
+}
 
-func TestSendAlarmDigestHandler_InsertsAlarm(t *testing.T) {
+func (d MockDigestDao) BuildDigestIndexes() {}
+func (d MockDigestDao) InsertDigest(digest dao.SendAlarmDigest) error {
+	return nil
+}
+func (d MockDigestDao) GetLastDigest(userId string) (dao.SendAlarmDigest, error) {
+	digest := dao.SendAlarmDigest{UserId: userId, RequestedAt: requestedAt}
+	return digest, nil
+}
+
+func (d MockAlarmDao) BuildAlarmIndexes() {}
+func (d MockAlarmDao) UpsertAlarm(alarm models.AlarmStatusChangeMessage) error {
+	return nil
+}
+func (d MockAlarmDao) GetActiveAlarms(userId string, from int64) ([]dao.AlarmStatusChangeEvent, error) {
+	events := getTwoAlarms()
+
+	return events, nil
+}
+
+func getTwoAlarms() []dao.AlarmStatusChangeEvent {
+	event1 := dao.AlarmStatusChangeEvent{AlarmID: "1", UserID: "1", Status: "CRITICAL", ChangedAt: requestedAt}
+	event2 := event1
+	event2.AlarmID = "2"
+	events := []dao.AlarmStatusChangeEvent{event1, event2}
+	return events
+}
+
+func getTwoMessageAlarms() []models.ActiveAlarm {
+	event1 := models.ActiveAlarm{AlarmID: "1", Status: "CRITICAL", LatestChangedAt: formatedTime}
+	event2 := event1
+	event2.AlarmID = "2"
+	events := []models.ActiveAlarm{event1, event2}
+	return events
+}
+
+func TestSendAlarmDigestHandler_PublishesAlarms(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	userId := "1"
+
+	config := config.Config{Nats: config.NatsConfig{ProducerSubjectAlarmDigest: "Send"}}
+	message := dao.SendAlarmDigest{UserId: userId, RequestedAt: requestedAt}
+
+	activeAlarms := getTwoMessageAlarms()
+	expected := models.AlarmDigest{
+		UserID:       userId,
+		ActiveAlarms: activeAlarms,
+	}
+	mockPublisher := mocks.NewMockPublisherInterface(ctrl)
+	mockPublisher.EXPECT().
+		PublishMessage(config.Nats.ProducerSubjectAlarmDigest, expected)
+
+	handler := SendAlarmDigestHandler(MockDigestDao{}, MockAlarmDao{}, mockPublisher, config)
+
+	handler(message)
+}
+
+func TestAlarmStatusChangeHandler_SavesAlarm(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	config := config.Config{Nats: config.NatsConfig{ProducerSubjectAlarmDigest: "Send" }}
-	message := dao.SendAlarmDigest{UserId: "1", RequestedAt: time.Now().UnixNano()}
-	mockPublisher := mocks.NewMockPublisherInterface(ctrl)
-	mockDigestDao := mocks.NewMockDigestDaoInterface(ctrl)
+	expected := models.AlarmStatusChangeMessage{
+		UserID:    "1",
+		AlarmID:   "2",
+		Status:    "WARNING",
+		ChangedAt: formatedTime,
+	}
 	mockAlarmDao := mocks.NewMockAlarmDaoInterface(ctrl)
+	mockAlarmDao.EXPECT().
+		UpsertAlarm(expected)
 
-	handler := SendAlarmDigestHandler(mockDigestDao, mockAlarmDao, mockPublisher, config)
+	handler := AlarmStatusChangeHandler(mockAlarmDao)
 
-	handler(message)
-
-	mockPublisher.EXPECT().
-		PublishMessage(config.Nats.ProducerSubjectAlarmDigest, message)
+	handler(expected)
 }

@@ -2,24 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="30384ff1-fbe9-46ab-9b5d-6fcad869f960" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/mocks/alarm.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mocks/digest.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/mocks/publisher.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/nats/handlers_test.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/alarm.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/alarm.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/client.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/client.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/dao/digest.go" beforeDir="false" afterPath="$PROJECT_DIR$/dao/digest.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/models/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/models/models.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nats/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/handlers.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nats/handlers_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nats/publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/publisher.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nats/subscriber.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/subscriber.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/nats/subscriber_test.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/util/time.go" beforeDir="false" afterPath="$PROJECT_DIR$/util/time.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nats/handlers.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/handlers.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nats/handlers_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/handlers_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nats/publisher.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/publisher.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nats/subscriber.go" beforeDir="false" afterPath="$PROJECT_DIR$/nats/subscriber.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +57,7 @@
     <property name="project.structure.last.edited" value="Project" />
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="go.vgo" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -81,7 +68,18 @@
       <recent name="$PROJECT_DIR$/src/nats" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Go Test.TestSendAlarmDigestHandler_InsertsAlarm in github.com/sblausten/go-service/nats">
+    <configuration name="TestSendAlarmDigestHandler_InsertsAlarm in github.com/sblausten/go-service/nats" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="go-service" />
+      <working_directory value="$PROJECT_DIR$/nats" />
+      <framework value="gotest" />
+      <kind value="PACKAGE" />
+      <package value="github.com/sblausten/go-service/nats" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <pattern value="^TestSendAlarmDigestHandler_InsertsAlarm$" />
+      <method v="2" />
+    </configuration>
     <configuration name="TestSendAlarmDigestHandler_InsertsAlarm in github.com/sblausten/go-service/src/nats" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="go-service" />
       <working_directory value="$PROJECT_DIR$/src/nats" />
@@ -95,6 +93,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestSendAlarmDigestHandler_InsertsAlarm in github.com/sblausten/go-service/nats" />
         <item itemvalue="Go Test.TestSendAlarmDigestHandler_InsertsAlarm in github.com/sblausten/go-service/src/nats" />
       </list>
     </recent_temporary>
@@ -133,7 +132,7 @@
       <workItem from="1624095657182" duration="51027000" />
       <workItem from="1624615031357" duration="598000" />
       <workItem from="1624627480908" duration="4764000" />
-      <workItem from="1624699026823" duration="27551000" />
+      <workItem from="1624699026823" duration="29686000" />
     </task>
     <servers />
   </component>
@@ -155,30 +154,34 @@
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
     <state x="670" y="-881" key="#Go_Modules_(vgo)/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624181407758" />
+    <state x="286" y="-887" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1624801468213">
+      <screen x="-126" y="-1057" width="1920" height="1057" />
+    </state>
+    <state x="286" y="-887" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624801468213" />
     <state x="817" y="-738" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1624192124478">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
     <state x="817" y="-738" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624192124478" />
-    <state width="1617" height="275" key="GridCell.Tab.0.bottom" timestamp="1624800347517">
+    <state width="1617" height="275" key="GridCell.Tab.0.bottom" timestamp="1624803186519">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
-    <state width="1617" height="275" key="GridCell.Tab.0.bottom/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624800347517" />
-    <state width="1617" height="275" key="GridCell.Tab.0.center" timestamp="1624800347516">
+    <state width="1617" height="275" key="GridCell.Tab.0.bottom/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624803186519" />
+    <state width="1617" height="275" key="GridCell.Tab.0.center" timestamp="1624803186518">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
-    <state width="1617" height="275" key="GridCell.Tab.0.center/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624800347516" />
-    <state width="1617" height="275" key="GridCell.Tab.0.left" timestamp="1624800347516">
+    <state width="1617" height="275" key="GridCell.Tab.0.center/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624803186518" />
+    <state width="1617" height="275" key="GridCell.Tab.0.left" timestamp="1624803186518">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
-    <state width="1617" height="275" key="GridCell.Tab.0.left/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624800347516" />
-    <state width="1617" height="275" key="GridCell.Tab.0.right" timestamp="1624800347517">
+    <state width="1617" height="275" key="GridCell.Tab.0.left/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624803186518" />
+    <state width="1617" height="275" key="GridCell.Tab.0.right" timestamp="1624803186519">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
-    <state width="1617" height="275" key="GridCell.Tab.0.right/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624800347517" />
-    <state x="652" y="-868" key="SettingsEditor" timestamp="1624000508903">
+    <state width="1617" height="275" key="GridCell.Tab.0.right/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624803186519" />
+    <state x="652" y="-868" key="SettingsEditor" timestamp="1624801605767">
       <screen x="-126" y="-1057" width="1920" height="1057" />
     </state>
-    <state x="652" y="-868" key="SettingsEditor/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624000508903" />
+    <state x="652" y="-868" key="SettingsEditor/0.23.1680.1027/-126.-1057.1920.1057@-126.-1057.1920.1057" timestamp="1624801605767" />
     <state x="258" y="123" width="1322" height="813" key="com.intellij.history.integration.ui.views.FileHistoryDialog" timestamp="1624719806111">
       <screen x="0" y="23" width="1680" height="1027" />
     </state>

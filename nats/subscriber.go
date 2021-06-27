@@ -21,7 +21,7 @@ type NatsSubscriber struct {
 
 func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Handler) {
 
-	subscriberName := fmt.Sprintln("%s Subscriber", subject)
+	subscriberName := fmt.Sprintf("%s Subscriber", subject)
 	opts := []nats.Option{nats.Name(subscriberName)}
 	opts = setupConnOptions(opts)
 
@@ -36,7 +36,7 @@ func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Hand
 
 	encodedConnection.QueueSubscribe(subject, s.Config.Nats.QueueGroup, messageHandler)
 	encodedConnection.Flush()
-	log.Printf( "Subscribed and listening to %s \n", subject)
+	log.Printf( "Subscribed to Nats server for subject: %s \n", subject)
 
 	if err := nc.LastError(); err != nil {
 		nc.Drain()

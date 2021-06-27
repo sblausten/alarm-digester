@@ -32,8 +32,8 @@ func (p Publisher) PublishMessage(subject string, message models.AlarmDigest) {
 	nc.Flush()
 
 	if err := nc.LastError(); err != nil {
-		log.Printf("PublishMessage - failed to publish message %m. Error was: '%e'\n", message, err)
+		log.Printf("PublishMessage - failed to publish message %v. Error was: '%v'\n", message, err)
 	} else {
-		log.Printf("PublishMessage - published digest to subject %s with %i alarms", subject, len(message.ActiveAlarms))
+		log.Printf("PublishMessage - published digest to subject %s with %d alarms", subject, len(message.ActiveAlarms))
 	}
 }
