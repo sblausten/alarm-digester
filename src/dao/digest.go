@@ -49,7 +49,7 @@ func (d DigestDao) BuildDigestIndexes() {
 }
 
 func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	digest.RequestedAt = util.GetCurrentUTCTimeAsUnixNano()
 
