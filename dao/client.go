@@ -2,7 +2,7 @@ package dao
 
 import (
 	"context"
-	"github.com/sblausten/go-service/src/config"
+	"github.com/sblausten/go-service/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"

@@ -2,8 +2,8 @@ package dao
 
 import (
 	"context"
-	"github.com/sblausten/go-service/src/models"
-	"github.com/sblausten/go-service/src/util"
+	"github.com/sblausten/go-service/models"
+	"github.com/sblausten/go-service/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"

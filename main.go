@@ -3,18 +3,18 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/dao"
+	"github.com/sblausten/go-service/nats"
 	"log"
 	"os"
-	"github.com/sblausten/go-service/src/nats"
-	"github.com/sblausten/go-service/src/dao"
-	"github.com/sblausten/go-service/src/config"
 	"os/signal"
 	"syscall"
 )
 
 func main() {
 	fmt.Println("Starting Digest Service...")
-	config := config.BuildConfig()
+	config := config.Config{}.Build()
 
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -30,9 +30,10 @@ func main() {
 	alarmDao.BuildAlarmIndexes()
 
 	natsSubscriber := nats.NatsSubscriber{Config: config, Context: ctx}
+	natsPublisher := nats.Publisher{Config: config}
 
 	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectAlarmStatusChange, nats.AlarmStatusChangeHandler(alarmDao))
-	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectSendAlarmDigest, nats.SendAlarmDigestHandler(digestDao, alarmDao, config))
+	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectSendAlarmDigest, nats.SendAlarmDigestHandler(digestDao, alarmDao, natsPublisher, config))
 
 	var (
 		shutdown    = make(chan os.Signal, 1)

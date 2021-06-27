@@ -3,7 +3,7 @@ package nats
 import (
 	"context"
 	"fmt"
-	"github.com/sblausten/go-service/src/config"
+	"github.com/sblausten/go-service/config"
 	"log"
 	"time"
 

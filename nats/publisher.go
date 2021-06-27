@@ -2,15 +2,23 @@ package nats
 
 import (
 	"github.com/nats-io/nats.go"
-	"github.com/sblausten/go-service/src/config"
-	"github.com/sblausten/go-service/src/models"
+	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/models"
 	"log"
 )
 
-func PublishMessage(subject string, message models.AlarmDigest, config config.Config) {
+type PublisherInterface interface {
+	PublishMessage(subject string, message models.AlarmDigest)
+}
+
+type Publisher struct {
+	Config config.Config
+}
+
+func (p Publisher) PublishMessage(subject string, message models.AlarmDigest) {
 	opts := []nats.Option{nats.Name("AlarmDigest Publisher")}
 
-	nc, err := nats.Connect(config.Nats.ServerAddress, opts...)
+	nc, err := nats.Connect(p.Config.Nats.ServerAddress, opts...)
 	ec, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
 		log.Fatal(err)

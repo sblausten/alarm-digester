@@ -1,10 +1,10 @@
 package nats
 
 import (
-	"context"
-	"github.com/sblausten/go-service/src/config"
-	"github.com/sblausten/go-service/src/dao"
-	"github.com/sblausten/go-service/src/models"
+	"github.com/sblausten/go-service/config"
+	"github.com/sblausten/go-service/dao"
+	"github.com/sblausten/go-service/models"
+	"github.com/sblausten/go-service/util"
 	"log"
 	"time"
 )
@@ -25,12 +25,14 @@ func AlarmStatusChangeHandler(alarmDao dao.AlarmDaoInterface) func(message model
 	}
 }
 
-func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.AlarmDaoInterface, config config.Config) func(message dao.SendAlarmDigest) {
+func SendAlarmDigestHandler(
+	digestDao dao.DigestDaoInterface,
+	alarmDao dao.AlarmDaoInterface,
+	publisher PublisherInterface,
+	config config.Config) func(message dao.SendAlarmDigest) {
+
 	messageCounter := 0
 	return func(message dao.SendAlarmDigest) {
-		_, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancel()
-
 		messageCounter++
 		log.Printf("[#%d] Received SendAlarmDigest request with userId: '%u'", messageCounter, message.UserId)
 
@@ -42,7 +44,7 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 			getAlarmsFrom = time.Now().UTC().Add(minusOneMonth).UnixNano()
 			log.Printf("SendAlarmDigestHandler - Fetching alarms from one month ago %d", getAlarmsFrom)
 		}
-		_, err = digestDao.InsertDigest(message)
+		err = digestDao.InsertDigest(message)
 		if err != nil {
 			log.Printf("SendAlarmDigestHandler - Error inserting digest request user %u: %e", message.UserId, err)
 			return
@@ -60,24 +62,18 @@ func SendAlarmDigestHandler(digestDao dao.DigestDaoInterface, alarmDao dao.Alarm
 		activeAlarms := []models.ActiveAlarm{}
 
 		for _, alarmChange := range userAlarms {
-			formattedTime1 := time.Unix(0, alarmChange.ChangedAt).UTC().Format(time.RFC3339Nano)
-
-			//formattedTime2, err := time.Parse(time.RFC3339Nano, alarmChange.ChangedAt)
-			//if err != nil {
-			//	log.Printf("GetActiveAlarms - Parsing alarm %i timestamp from db failed: %e", alarmChange.AlarmID, err)
-			//	return
-			//}
+			time := util.ConvertUnixToFormatted(alarmChange.ChangedAt)
 
 			publishedAlarm := models.ActiveAlarm{
-				AlarmID: alarmChange.AlarmID,
-				Status: alarmChange.Status,
-				LatestChangedAt: formattedTime1,
+				AlarmID:         alarmChange.AlarmID,
+				Status:          alarmChange.Status,
+				LatestChangedAt: time,
 			}
 			activeAlarms = append(activeAlarms, publishedAlarm)
 		}
 
 		alarmDigest := models.AlarmDigest{message.UserId, activeAlarms}
 
-		PublishMessage(config.Nats.ProducerSubjectAlarmDigest, alarmDigest, config)
+		publisher.PublishMessage(config.Nats.ProducerSubjectAlarmDigest, alarmDigest)
 	}
 }

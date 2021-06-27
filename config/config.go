@@ -29,7 +29,7 @@ type NatsConfig struct {
 	ServerAddress                      string
 }
 
-func BuildConfig() Config {
+func (c Config) Build() Config {
 	config := loadFrom("application-config.json")
 
 	env, envIsPresent := os.LookupEnv("ENV")

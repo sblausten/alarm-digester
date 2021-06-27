@@ -2,8 +2,7 @@ package dao
 
 import (
 	"context"
-	"fmt"
-	"github.com/sblausten/go-service/src/util"
+	"github.com/sblausten/go-service/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,7 +12,7 @@ import (
 
 type DigestDaoInterface interface {
 	BuildDigestIndexes()
-	InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error)
+	InsertDigest(digest SendAlarmDigest) error
 	GetLastDigest(userId string) (SendAlarmDigest, error)
 }
 
@@ -44,18 +43,18 @@ func (d DigestDao) BuildDigestIndexes() {
 	if err != nil {
 		log.Println("BuildDigestIndexes - Error creating indexes:", err)
 	} else {
-		fmt.Printf("BuildDigestIndexes - Created indexes %i on collection %c \n", indexes, d.Collection.Name())
+		log.Printf("BuildDigestIndexes - Created indexes %i on collection %c \n", indexes, d.Collection.Name())
 	}
 }
 
-func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult, error) {
+func (d DigestDao) InsertDigest(digest SendAlarmDigest) error {
 	ctx, _ := context.WithTimeout(context.Background(), 5*time.Second)
 
 	digest.RequestedAt = util.GetCurrentUTCTimeAsUnixNano()
 
 	data, err := bson.Marshal(digest)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	log.Printf("InsertDigest - saving digest request for user: %u", digest.UserId)
@@ -66,7 +65,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 		log.Printf("InsertDigest - successfully inserted Digest %i \n", res)
 	}
 
-	return res, err
+	return err
 }
 
 func (d DigestDao) GetLastDigest(userId string) (SendAlarmDigest, error) {
