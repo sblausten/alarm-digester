@@ -3,6 +3,7 @@ package dao
 import (
 	"context"
 	"fmt"
+	"github.com/sblausten/go-service/src/util"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -50,7 +51,7 @@ func (d DigestDao) InsertDigest(digest SendAlarmDigest) (*mongo.InsertOneResult,
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	digest.RequestedAt = time.Now().UTC().UnixNano()
+	digest.RequestedAt = util.GetCurrentUTCTimeAsUnixNano()
 
 	data, err := bson.Marshal(digest)
 	if err != nil {

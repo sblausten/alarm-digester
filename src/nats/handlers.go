@@ -16,7 +16,7 @@ func AlarmStatusChangeHandler(alarmDao dao.AlarmDaoInterface) func(message model
 		messageCounter++
 		log.Printf("AlarmStatusChangeHandler - [#%d] Received AlarmStatusChangeEvent for [%s] with alarmId: '%s'", messageCounter, message.ChangedAt, message.AlarmID)
 
-		_, err := alarmDao.InsertAlarm(message)
+		err := alarmDao.UpsertAlarm(message)
 		if err != nil {
 			log.Printf("AlarmStatusChangeHandler - Failed to save AlarmStatusChangeEvent message with alarmId: %a for user: %u. Error: ", message.AlarmID, message.UserID, err)
 		} else {
