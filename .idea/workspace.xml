@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="30384ff1-fbe9-46ab-9b5d-6fcad869f960" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/src/dao/digest.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/dao/digest.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/nats/subscriber.go" beforeDir="false" afterPath="$PROJECT_DIR$/src/nats/subscriber.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +100,7 @@
       <workItem from="1624095657182" duration="51027000" />
       <workItem from="1624615031357" duration="598000" />
       <workItem from="1624627480908" duration="4764000" />
-      <workItem from="1624699026823" duration="19376000" />
+      <workItem from="1624699026823" duration="20426000" />
     </task>
     <servers />
   </component>

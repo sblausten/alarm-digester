@@ -15,8 +15,8 @@ import (
 func main() {
 	fmt.Println("Starting Digest Service...")
 	config := config.BuildConfig()
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+
+	ctx, cancel := context.WithCancel(context.Background())
 
 	dbClient := dao.BuildClient(config, ctx)
 	defer dbClient.Disconnect(ctx)
@@ -29,7 +29,7 @@ func main() {
 	digestDao.BuildDigestIndexes()
 	alarmDao.BuildAlarmIndexes()
 
-	natsSubscriber := nats.NatsSubscriber{Config: config}
+	natsSubscriber := nats.NatsSubscriber{Config: config, Context: ctx}
 
 	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectAlarmStatusChange, nats.AlarmStatusChangeHandler(alarmDao))
 	go natsSubscriber.StartSubscriber(config.Nats.SubscriberSubjectSendAlarmDigest, nats.SendAlarmDigestHandler(digestDao, alarmDao, config))

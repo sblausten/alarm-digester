@@ -1,6 +1,7 @@
 package nats
 
 import (
+	"context"
 	"fmt"
 	"github.com/sblausten/go-service/src/config"
 	"log"
@@ -15,6 +16,7 @@ type NatsSubscriberInterface interface {
 
 type NatsSubscriber struct {
 	Config config.Config
+	Context context.Context
 }
 
 func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Handler) {
@@ -34,12 +36,19 @@ func (s NatsSubscriber) StartSubscriber(subject string, messageHandler nats.Hand
 
 	encodedConnection.QueueSubscribe(subject, s.Config.Nats.QueueGroup, messageHandler)
 	encodedConnection.Flush()
+	log.Printf( "Subscribed and listening to %s \n", subject)
 
 	if err := nc.LastError(); err != nil {
+		nc.Drain()
 		log.Fatal(err)
 	}
 
-	log.Printf( "Subscribed and listening to %s \n", subject)
+	select {
+	case <-s.Context.Done():
+		if err := nc.Drain(); err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func setupConnOptions(opts []nats.Option) []nats.Option {
@@ -47,6 +56,7 @@ func setupConnOptions(opts []nats.Option) []nats.Option {
 	reconnectDelay := time.Second
 
 	opts = append(opts, nats.ReconnectWait(reconnectDelay))
+	opts = append(opts, nats.DrainTimeout(20*time.Second))
 	opts = append(opts, nats.MaxReconnects(int(totalWait/reconnectDelay)))
 	opts = append(opts, nats.DisconnectHandler(func(nc *nats.Conn) {
 		log.Printf("Disconnected: will attempt reconnects for %.0fm", totalWait.Minutes())
