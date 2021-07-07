@@ -1,0 +1,14 @@
+{
+  "Db": {
+    "Name": "alarm-digest",
+    "LocalAddress": "mongodb://localhost:27017",
+    "DockerServerAddress": "mongodb://test-db:27017"
+  },
+  "Nats": {
+    "QueueGroup": "alarm-digester-1",
+    "SubscriberSubjectSendAlarmDigest": "SendAlarmDigest",
+    "SubscriberSubjectAlarmStatusChange": "AlarmStatusChanged",
+    "ProducerSubjectAlarmDigest": "AlarmDigest",
+    "DockerServerAddress": "nats://nats:4222"
+  }
+}

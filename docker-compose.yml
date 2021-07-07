@@ -19,7 +19,7 @@ services:
     restart: unless-stopped
   digester:
     image: sblausten/alarm-digester:latest
-    build: .
+    build: ./app
     restart: on-failure
     links:
       - nats
