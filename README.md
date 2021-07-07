@@ -30,7 +30,7 @@ When a SendAlarmDigest for a given user is received the service must send an Ala
 The AlarmDigest message should include only active alarm which are in WARNING or CRITICAL state.
 
 You will also need to create a publisher to send the AlarmDigest to the notification service
-This message should contain the latest statuses for each alarm per user (please refer to the “Topics and message schemas” for details of the payloads
+This message should contain the latest statuses for each alarm per user.
 
 
 NOTES:
